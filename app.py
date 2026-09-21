@@ -3,7 +3,7 @@ import requests
 import yt_dlp
 import os
 
-TOKEN = "8879492437:AAHondmiPES1UjNmmp7RzogThoID3VgLcio"
+TOKEN = os.environ.get("BOT_TOKEN")
 BOT_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 app = Flask(__name__)
