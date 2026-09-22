@@ -133,7 +133,8 @@ def send_message(chat_id, text):
     })
 
 @app.route('/')
-token_status = "TOKEN BOR" if TOKEN else "TOKEN YOQ"
+def home():
+    token_status = "TOKEN BOR" if TOKEN else "TOKEN YOQ"
     return "Bot ishlayapti! " + token_status
 
 if __name__ == '__main__':
