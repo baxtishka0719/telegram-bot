@@ -7,9 +7,12 @@ TOKEN = os.environ.get("BOT_TOKEN")
 BOT_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 app = Flask(__name__)
+url_store = {}
+counter = 0
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
+    global counter
     data = request.get_json()
 
     if data and 'message' in data:
@@ -19,7 +22,10 @@ def webhook():
         if text == '/start':
             send_message(chat_id, "Salom! Menga YouTube, TikTok yoki Instagram havolasini yuboring.")
         elif text.startswith('http'):
-            send_link_options(chat_id, text)
+            counter += 1
+            key = str(counter)
+            url_store[key] = text
+            send_link_options(chat_id, key)
         else:
             send_message(chat_id, "Menga video havolasini (link) yuboring.")
 
@@ -28,15 +34,15 @@ def webhook():
 
     return {'ok': True}
 
-def send_link_options(chat_id, url):
+def send_link_options(chat_id, key):
     requests.post(f"{BOT_URL}/sendMessage", json={
         'chat_id': chat_id,
         'text': "Nima kerak?",
         'reply_markup': {
             'inline_keyboard': [[
-                {'text': 'Video', 'callback_data': f'video|{url}'},
-                {'text': 'Audio', 'callback_data': f'audio|{url}'},
-                {'text': 'Malumot', 'callback_data': f'info|{url}'}
+                {'text': 'Video', 'callback_data': f'video|{key}'},
+                {'text': 'Audio', 'callback_data': f'audio|{key}'},
+                {'text': 'Malumot', 'callback_data': f'info|{key}'}
             ]]
         }
     })
@@ -44,11 +50,16 @@ def send_link_options(chat_id, url):
 def handle_callback(callback):
     chat_id = callback['message']['chat']['id']
     data_str = callback['data']
-    action, url = data_str.split('|', 1)
+    action, key = data_str.split('|', 1)
+    url = url_store.get(key)
 
     requests.post(f"{BOT_URL}/answerCallbackQuery", json={
         'callback_query_id': callback['id']
     })
+
+    if not url:
+        send_message(chat_id, "Havola muddati tugagan, qaytadan yuboring.")
+        return
 
     if action == 'video':
         send_message(chat_id, "Video yuklanmoqda, biroz kuting...")
