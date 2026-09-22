@@ -133,8 +133,8 @@ def send_message(chat_id, text):
     })
 
 @app.route('/')
-def home():
-    return "Bot ishlayapti!"
+token_status = "TOKEN BOR" if TOKEN else "TOKEN YOQ"
+    return "Bot ishlayapti! " + token_status
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
